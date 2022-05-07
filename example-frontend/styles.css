@@ -1,0 +1,18 @@
+body {
+    background-color: #191919;
+    color: #ECDBBA;
+} 
+
+p {
+    font-size: 1.2em;
+    margin: 0 16px;
+}
+
+a {
+    margin: 0 16px;
+    color: #C84B31;
+}
+
+audio {
+    height: 20px;
+}
