@@ -46,7 +46,7 @@ const get_album_playlist = async (playlistId) => {
 
 router.get('/album/:playlistId', async (req, res) => {
     // Set header
-    res.setHeader('Content-disposition', contentDisposition(`${req.query.artist} - ${req.query.title} (${req.query.year}).zip`));
+    res.setHeader('Content-disposition', contentDisposition(`${req.query.artist} - ${req.query.album} (${req.query.year}).zip`));
     res.setHeader('Content-type', 'application/zip')
     // Get tags
     let albCover = await axios.get(req.query.cover, { responseType: 'arraybuffer' })

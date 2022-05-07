@@ -18,6 +18,6 @@ app.use('/api/download', download);
 app.use(express.static(`${__dirname}/example-frontend`))
 
 app.listen(port, () => {
-    console.log('App working on port 4000')
+    console.log(`App is now working on: ${port}`)
 })
 
