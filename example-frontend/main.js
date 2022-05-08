@@ -75,14 +75,34 @@ let downloadSong = (link, id) => {
     }); 
 }
 
+let toggleAlbumTracks = (el) => {
+    if ($(`#${el}`).is(':visible')) { // If shown just hide 
+        $(`#${el}-methods`).css('display', 'block') // Show methods
+        $(`#${el}-tracks`).css('display', 'block') // Show Tracklist
+        $(`#${el}`).css('display', 'none') // Hide element 
+    } else { // If hidden, reveal it
+        $(`#${el}-methods`).css('display', 'none') // Hide options
+        $(`#${el}-tracks`).css('display', 'none') // Hide tracklist
+        $(`#${el}`).css('display', 'block') // Show element
+    }
+}
+
 let showAlbumTracks = async (playlistLink, id, artist, album, year, cover) => {
-    let resp = await fetch(playlistLink)
-    let data = await resp.json()
-    // replace download button or something replace later with like "Show Tracks..." // HEREEEEEEEEEEEEEEEE
-    $(`#${id}`).replaceWith(`
+    let resp, data;
+    if ($(`#${id}-tracks`).length) { // If the element exists no need to fetch to api again when reclicked button
+        console.log(`Tracklist exists for element '#${id}-tracks' - No need to fetch API`)
+        toggleAlbumTracks(id)
+        return
+    } else {
+        resp = await fetch(playlistLink)
+        data = await resp.json()
+    }
+
+    toggleAlbumTracks(id)
+    $(`#${id}`).after(`
         <div id="${id}-methods"> 
-            <a style="font-size: 14px; margin-bottom: 12px;" href="#"> Close </a> 
-            <a style="font-size: 14px; margin-bottom: 12px;" href="#"> Download Album </a>
+            <a onclick="toggleAlbumTracks('${id}')" style="font-size: 14px; margin-bottom: 12px;" href="#"> Close </a> 
+            <a onclick="" id="${id}-download" style="font-size: 14px; margin-bottom: 12px;" href="#"> Download Album </a>
         </div>
         <div id="${id}-tracks"> 
         </div>
