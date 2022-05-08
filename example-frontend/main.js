@@ -11,7 +11,7 @@ let streamAudio = (link, id) => {
     `)
 }
 
-let downloadStuff = (link, id) => {
+let downloadSong = (link, id) => {
     $(`#${id}`).replaceWith(`
         <label id="${id}-label" for="${id}" style="margin-left: 16px;"> </label>
         <progress id="${id}" style="width: 100px;" value="0" max="100"></progress>
@@ -75,26 +75,54 @@ let downloadStuff = (link, id) => {
     }); 
 }
 
+let showAlbumTracks = async (playlistLink, id, artist, album, year, cover) => {
+    let resp = await fetch(playlistLink)
+    let data = await resp.json()
+    // replace download button or something replace later with like "Show Tracks..." // HEREEEEEEEEEEEEEEEE
+    $(`#${id}`).replaceWith(`
+        <div id="${id}-methods"> 
+            <a style="font-size: 14px; margin-bottom: 12px;" href="#"> Close </a> 
+            <a style="font-size: 14px; margin-bottom: 12px;" href="#"> Download Album </a>
+        </div>
+        <div id="${id}-tracks"> 
+        </div>
+    `)
+
+    for (let i = 0; i < data.length; i++) {
+        let title = data[i].playlistVideoRenderer.title.runs[0].text;
+        let videoId = data[i].playlistVideoRenderer.videoId;
+        $(`#${id}-tracks`).append(`
+            <p style="display:flex; font-size: 12px; width: 600px; gap:20px;"> 
+                <b>Track: #${i + 1}</b> 
+                ${title}
+                <a style="margin: 0px" id="progress-bar-${i}-album" href="#" onclick="downloadSong('/api/download/song/${videoId}?artist=${artist}&album=${album}&title=${title}&cover=${cover}&year=${year}&track=${i + 1}', 'progress-bar-${i}-album')"> 
+                    Download Track
+                </a>
+            </p>
+        `)
+    }
+}
+
 let showInformation = async(data, handler) => {
     if (handler == 'Album') {
         for (let i = 0; i < data.length; i++) { // Start progress bar
-            if (data[i].artists.length == 0) { // If there are no artists in the album
+            if (data[i].artists.length == 0) { // If there are no artists in the album // ID, ARTIST, ALBUM, YEAR, COVER
                 Content.append(` 
                     <div class="itemContainer" style="display:flex; margin: 16px;">
-                        <img src="${data[i].thumbnails[0].url}" alt="${data[i].name} album cover...">
+                        <img style="height:60px; width:60px;" src="${data[i].thumbnails[0].url}" alt="${data[i].name} album cover...">
                         <div style="flex-direction:column;">
                             <p style="padding-bottom: 10px;"> Various Artists - ${data[i].name} (${data[i].year}) </p>
-                            <a id="progress-bar-${i}" href="#" onclick="downloadStuff('/api/download/album/${data[i].playlistId}?artist=Various Artists&album=${data[i].name}&year=${data[i].year}&cover=${data[i].thumbnails[3].url}', 'progress-bar-${i}')"> Download </a>
+                            <a id="showAlbumTracks-${i}" href="#" onclick="showAlbumTracks('/api/get/album/playlist/${data[i].playlistId}', 'showAlbumTracks-${i}', 'Various Artists', '${data[i].name}', '${data[i].year}', '${data[i].thumbnails[3].url}')"> Show Tracks </a>
                         </div>
                     </div>
                 `)
             } else {
                 Content.append(`
                     <div class="itemContainer" style="display:flex; margin: 16px;">
-                        <img src="${data[i].thumbnails[0].url}" alt="${data[i].name} album cover...">
+                        <img style="height:60px; width: 60px;" src="${data[i].thumbnails[0].url}" alt="${data[i].name} album cover...">
                         <div style="flex-direction:column;">
                             <p style="padding-bottom: 10px;"> ${data[i].artists[0].name} - ${data[i].name} (${data[i].year}) </p>
-                            <a id="progress-bar-${i}" href="#" onclick="downloadStuff('/api/download/album/${data[i].playlistId}?artist=${data[i].artists[0].name}&album=${data[i].name}&year=${data[i].year}&cover=${data[i].thumbnails[3].url}', 'progress-bar-${i}')"> Download </a>
+                            <a id="showAlbumTracks-${i}" href="#" onclick="showAlbumTracks('/api/get/album/playlist/${data[i].playlistId}', 'showAlbumTracks-${i}', '${data[i].artists[0].name}', '${data[i].name}', '${data[i].year}', '${data[i].thumbnails[3].url}')"> Show Tracks </a>
                         </div>
                     </div>
                 `)
@@ -109,7 +137,7 @@ let showInformation = async(data, handler) => {
                         <img src="${data[i].thumbnails[0].url}" alt="album cover...">
                         <div style="flex-direction:column;">
                             <p style="padding-bottom: 10px;"> Various Artists - ${data[i].name} </p>
-                            <a id="progress-bar-${i}" href="#" onclick="downloadStuff('/api/download/song/${data[i].videoId}?artist=Various Artists&title=${data[i].name}&album=${data[i].album.name}&cover=${cover}', 'progress-bar-${i}')"> Download </a>
+                            <a id="progress-bar-${i}" href="#" onclick="downloadSong('/api/download/song/${data[i].videoId}?artist=Various Artists&title=${data[i].name}&album=${data[i].album.name}&cover=${cover}', 'progress-bar-${i}')"> Download </a>
                             <a id="streamButton-${i}" href="#" onclick="streamAudio('api/stream/song/${data[i].videoId}', '#streamButton-${i}')">Play Now</a>
                         </div>
                     </div>
@@ -120,7 +148,7 @@ let showInformation = async(data, handler) => {
                         <img src="${data[i].thumbnails[0].url}" alt="album cover...">
                         <div style="flex-direction:column;">
                             <p style="padding-bottom: 10px;"> ${data[i].artists[0].name} - ${data[i].name} </p> 
-                            <a id="progress-bar-${i}" href="#" onclick="downloadStuff('/api/download/song/${data[i].videoId}?artist=${data[i].artists[0].name}&title=${data[i].name}&album=${data[i].album.name}&cover=${cover}', 'progress-bar-${i}')"> Download </a>
+                            <a id="progress-bar-${i}" href="#" onclick="downloadSong('/api/download/song/${data[i].videoId}?artist=${data[i].artists[0].name}&title=${data[i].name}&album=${data[i].album.name}&cover=${cover}', 'progress-bar-${i}')"> Download </a>
                             <a id="streamButton-${i}" href="#" onclick="streamAudio('api/stream/song/${data[i].videoId}', '#streamButton-${i}')">Play Now</a>
                         </div>
                     </div>
