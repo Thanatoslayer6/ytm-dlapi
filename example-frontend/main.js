@@ -80,6 +80,7 @@ let downloadAlbum = async (id, numOfTracks) => {
     $(`#${id}-tracks p a`).each((index, el) => { // Store every track's download link in array
         properTrackURLS.push(el.attributes[1].nodeValue)
     })
+
     for (let i = 0; i < numOfTracks; i++) { // Replace "Download Tracks" with a progress bar, and store all links in array
         $(`#progress-${id}-${i}`).replaceWith(`
         <label id="progress-${id}-${i}-label" for="progress-${id}-${i}" style="margin-left: 16px;"> </label>
@@ -88,12 +89,13 @@ let downloadAlbum = async (id, numOfTracks) => {
     }
 
     for (let i = 0; i < numOfTracks; i++) {
-        let blob = await fetch(properTrackURLS[i]).then(data => data.blob())
-        let URL = window.URL || window.webkitURL;
-        let downloadUrl = URL.createObjectURL(blob);
-
+        fetch(properTrackURLS[i])
+            .then(response => response.blob())
+            .then(blob => {
+                blobTrackURLS.push(URL.createObjectURL(blob))
+            })
+        
         // Push specific track blob url to array
-        blobTrackURLS.push(downloadUrl)
         // CONTINUE HERE (add all blob files to zip file, find a way to show progress per donwload)
         // $.ajax({
         //     url: properTrackURLS[i],
@@ -125,7 +127,6 @@ let downloadAlbum = async (id, numOfTracks) => {
         //             let matches = filenameRegex.exec(disposition);
         //             if (matches != null && matches[1]) filename = matches[1].replace(/['"]/g, '');
         //         }
-
         //         if (typeof window.navigator.msSaveBlob !== 'undefined') {
         //             // IE workaround for "HTML7007: One or more blob URLs were revoked by closing the blob for which they were created. These URLs will no longer resolve as the data backing the URL has been freed."
         //             window.navigator.msSaveBlob(blob, filename);
