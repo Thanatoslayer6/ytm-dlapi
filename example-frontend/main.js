@@ -75,6 +75,73 @@ let downloadSong = (link, id) => {
     }); 
 }
 
+let downloadAlbum = async (id, numOfTracks) => {
+    let blobTrackURLS = [], properTrackURLS = [], link;
+    $(`#${id}-tracks p a`).each((index, el) => { // Store every track's download link in array
+        properTrackURLS.push(el.attributes[1].nodeValue)
+    })
+    for (let i = 0; i < numOfTracks; i++) { // Replace "Download Tracks" with a progress bar, and store all links in array
+        $(`#progress-${id}-${i}`).replaceWith(`
+        <label id="progress-${id}-${i}-label" for="progress-${id}-${i}" style="margin-left: 16px;"> </label>
+        <progress id="progress-${id}-${i}" style="width: 100px;" value="0" max="100"></progress>
+        `)
+    }
+
+    for (let i = 0; i < numOfTracks; i++) {
+        let blob = await fetch(properTrackURLS[i]).then(data => data.blob())
+        let URL = window.URL || window.webkitURL;
+        let downloadUrl = URL.createObjectURL(blob);
+
+        // Push specific track blob url to array
+        blobTrackURLS.push(downloadUrl)
+        // CONTINUE HERE (add all blob files to zip file, find a way to show progress per donwload)
+        // $.ajax({
+        //     url: properTrackURLS[i],
+        //     type: 'GET',
+        //     xhrFields: {
+        //         responseType: 'blob'
+        //     },
+        //     xhr: () => {
+        //         let xhr = new window.XMLHttpRequest();
+        //         xhr.onreadystatechange = () => {
+        //             $(`#progress-${id}-${i}`).val(xhr.readyState * 25)
+        //             if (xhr.readyState == 1) {
+        //                 $(`#progress-${id}-${i}-label`).text("Processing (please wait): ")
+        //             } else if (xhr.readyState == 2) {
+        //                 $(`#progress-${id}-${i}-label`).text("Downloading: ")
+        //             } else if (xhr.readyState == 3) {
+        //                 $(`#progress-${id}-${i}-label`).text("Sending: ")
+        //             } else {
+        //                 $(`#progress-${id}-${i}-label`).text("Finished: ")
+        //             }
+        //         }
+        //         return xhr
+        //     },
+        //     success: (blob, status, xhr) => {
+        //         let filename = "";
+        //         let disposition = xhr.getResponseHeader('Content-Disposition');
+        //         if (disposition && disposition.indexOf('attachment') !== -1) {
+        //             let filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+        //             let matches = filenameRegex.exec(disposition);
+        //             if (matches != null && matches[1]) filename = matches[1].replace(/['"]/g, '');
+        //         }
+
+        //         if (typeof window.navigator.msSaveBlob !== 'undefined') {
+        //             // IE workaround for "HTML7007: One or more blob URLs were revoked by closing the blob for which they were created. These URLs will no longer resolve as the data backing the URL has been freed."
+        //             window.navigator.msSaveBlob(blob, filename);
+        //         } else {
+        //             let URL = window.URL || window.webkitURL;
+        //             let downloadUrl = URL.createObjectURL(blob);
+        //             // Push specific track blob url to array
+        //             blobTrackURLS.push(downloadUrl)
+        //         }
+        //     },
+        //     async: false
+        // })
+    }
+    console.log(blobTrackURLS)
+}
+
 let toggleAlbumTracks = (el) => {
     if ($(`#${el}`).is(':visible')) { // If shown just hide 
         $(`#${el}-methods`).css('display', 'block') // Show methods
@@ -100,9 +167,9 @@ let showAlbumTracks = async (playlistLink, id, artist, album, year, cover) => {
 
     toggleAlbumTracks(id)
     $(`#${id}`).after(`
-        <div id="${id}-methods"> 
-            <a onclick="toggleAlbumTracks('${id}')" style="font-size: 14px; margin-bottom: 12px;" href="#"> Close </a> 
-            <a onclick="" id="${id}-download" style="font-size: 14px; margin-bottom: 12px;" href="#"> Download Album </a>
+        <div id="${id}-methods" style="margin-bottom: 8px;"> 
+            <a onclick="toggleAlbumTracks('${id}')" style="font-size: 14px;" href="#"> Close </a> 
+            <a onclick="downloadAlbum('${id}', ${data.length})" id="${id}-download" style="font-size: 14px;" href="#"> Download Album </a>
         </div>
         <div id="${id}-tracks"> 
         </div>
@@ -111,11 +178,12 @@ let showAlbumTracks = async (playlistLink, id, artist, album, year, cover) => {
     for (let i = 0; i < data.length; i++) {
         let title = data[i].playlistVideoRenderer.title.runs[0].text;
         let videoId = data[i].playlistVideoRenderer.videoId;
+        let link = `/api/download/song/${videoId}?artist=${artist}&album=${album}&title=${title}&cover=${cover}&year=${year}&track=${i + 1}`
         $(`#${id}-tracks`).append(`
             <p style="display:flex; font-size: 12px; width: 600px; gap:20px;"> 
                 <b>Track: #${i + 1}</b> 
                 ${title}
-                <a style="margin: 0px" id="progress-bar-${i}-album" href="#" onclick="downloadSong('/api/download/song/${videoId}?artist=${artist}&album=${album}&title=${title}&cover=${cover}&year=${year}&track=${i + 1}', 'progress-bar-${i}-album')"> 
+                <a style="margin: 0px" itemid="${link}" id="progress-${id}-${i}" href="#" onclick="downloadSong('${link}', 'progress-${id}-${i}')"> 
                     Download Track
                 </a>
             </p>
