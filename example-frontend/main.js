@@ -76,28 +76,33 @@ let downloadSong = (link, id) => {
 }
 
 let downloadAlbum = async (id, numOfTracks, artist, album, year) => {
-    let storage = [];
+    let storage = [], error = {}, x = 0, progressText = "Downloading Tracks";
     let zip = new JSZip()
     let zipped = zip.folder(`${artist} - ${album} (${year})`) // Create folder to store tracks
 
     $(`#${id}-tracks p a`).each((index, el) => { // Store every track's download link in array
         storage.push({
-            downloadURL: el.attributes[1].nodeValue,
-            track: el.attributes[2].nodeValue,
+            downloadURL: el.attributes[0].nodeValue, // itemid
+            track: el.attributes[1].nodeValue // data-title
         })
     })
+    // Make sure the download button is not clickable, change its color and innerText
+    $(`#${id}-download`).removeAttr("href").removeAttr("onclick").text(progressText).css('color', '#4e9d68')
+    // Set up animation
+    let loading_animation = setInterval(() => {
+        x = ++x % 4;
+        $(`#${id}-download`).text(progressText + Array(x + 1).join("."));
+    }, 500)
 
-    for (let i = 0; i < numOfTracks; i++) { // Replace "Download Tracks" with a progress bar, and store all links in array
+    for (let i = 0; i < numOfTracks; i++) {
+        error.status = false; // Set to false every iteration
+        // Replace "Download Tracks" with a progress bar
         $(`#progress-${id}-${i}`).replaceWith(`
         <label id="progress-${id}-${i}-label" for="progress-${id}-${i}" style="margin: 0 2px 0 16px;"> </label>
         <progress id="progress-${id}-${i}" style="width: 100px;" value="0" max="100"></progress>
         `)
-    }
-
-    for (let i = 0; i < numOfTracks; i++) {
         $(`#progress-${id}-${i}`).val(25) // Put 25%
         $(`#progress-${id}-${i}-label`).text("Processing (please wait): ")
-        try {
             await fetch(storage[i].downloadURL)
                 .then(response => response.blob())
                 .then(blob => {
@@ -105,20 +110,38 @@ let downloadAlbum = async (id, numOfTracks, artist, album, year) => {
                     $(`#progress-${id}-${i}-label`).text("Getting blob: ")
                     storage[i].blob = blob // Store blob into array
                 })
+                .catch(err => {
+                    console.error(`Error in iteration ${i}: ${err}`)
+                    $(`#progress-${id}-${i}`).val(0)
+                    $(`#progress-${id}-${i}-label`).text("Error fetching track: ")
+                    error.status = true;
+                    error.reason = err;
+                })
+            if (error.status) {
+                continue;
+            }
             $(`#progress-${id}-${i}`).val(75) // Put 75%
             $(`#progress-${id}-${i}-label`).text("Archiving file: ")
             zipped.file(`${artist} - ${storage[i].track}.mp3`, storage[i].blob) // Archive file
             // 
             $(`#progress-${id}-${i}`).val(100) // Put 100%
             $(`#progress-${id}-${i}-label`).text("Finished: ")
-        } catch(err) {
-            console.error(`Error in iteration ${i}: ${err}`)
-            $(`#progress-${id}-${i}`).val(0)
-            $(`#progress-${id}-${i}-label`).text("Error fetching track: ")
-        }
     }
-    zip.generateAsync({type:"blob"}).then(content => saveAs(content, `${artist} - ${album} (${year}).zip`));
-    console.log(`Done processing, serving now - [${artist} - ${album} (${year}).zip] -  No errors found...`)
+    // Text animation
+    progressText = "Archiving now";
+    $(`#${id}-download`).css('color', '#008000')
+    if (error.status) {
+        console.log(`Reason for Error => ${error.reason}`) 
+        alert(`${error.reason} : Please close this message to reload page and try again...`)
+        window.location.reload()
+    } else {
+        zip.generateAsync({type:"blob"}).then(content => {
+            saveAs(content, `${artist} - ${album} (${year}).zip`);
+            console.log(`Done processing, serving now - [${artist} - ${album} (${year}).zip] -  No errors found...`)
+            clearInterval(loading_animation); // disable the loading animation
+            $(`#${id}-download`).text("Finished!").css('color', '#00FF00')
+        })
+    }
 }
 
 let toggleAlbumTracks = (el) => {
@@ -148,11 +171,16 @@ let showAlbumTracks = async (playlistLink, id, artist, album, year, cover) => {
     $(`#${id}`).after(`
         <div id="${id}-methods" style="margin-bottom: 8px;"> 
             <a onclick="toggleAlbumTracks('${id}')" style="font-size: 14px;" href="#"> Close </a> 
-            <a onclick="downloadAlbum('${id}', ${data.length}, '${artist}', '${album}', ${year})" id="${id}-download" style="font-size: 14px;" href="#"> Download Album </a>
+            <a id="${id}-download" style="font-size: 14px;" href="#"> Download Album </a>
         </div>
         <div id="${id}-tracks"> 
         </div>
     `)
+    // Attach onclick to the "Download Album" method
+    document.getElementById(`${id}-download`).onclick = () => {
+        downloadAlbum(id, data.length, artist, album, year)
+    }
+    // onclick="downloadAlbum('${id}', ${data.length}, '${artist}', '${album}', ${year})" 
 
     for (let i = 0; i < data.length; i++) {
         let title = data[i].playlistVideoRenderer.title.runs[0].text;
@@ -169,30 +197,36 @@ let showAlbumTracks = async (playlistLink, id, artist, album, year, cover) => {
         `)
     }
 }
-
-let showInformation = async(data, handler) => {
+                            // <a id="showAlbumTracks-${i}" href="#" onclick="showAlbumTracks('/api/get/album/playlist/${data[i].playlistId}', 'showAlbumTracks-${i}', ${data[i].artists[0].name}, ${data[i].name}, ${data[i].year}, '${data[i].thumbnails[3].url}')"> Show Tracks </a>
+let showInformation = async (data, handler) => {
     if (handler == 'Album') {
         for (let i = 0; i < data.length; i++) { // Start progress bar
             if (data[i].artists.length == 0) { // If there are no artists in the album // ID, ARTIST, ALBUM, YEAR, COVER
                 Content.append(` 
                     <div class="itemContainer" style="display:flex; margin: 16px;">
-                        <img style="height:60px; width:60px;" src="${data[i].thumbnails[0].url}" alt="${data[i].name} album cover...">
+                        <img referrerpolicy="no-referrer" style="height:60px; width:60px;" src="${data[i].thumbnails[0].url}" alt="${data[i].name} [Cover]">
                         <div style="flex-direction:column;">
                             <p style="padding-bottom: 10px;"> Various Artists - ${data[i].name} (${data[i].year}) </p>
-                            <a id="showAlbumTracks-${i}" href="#" onclick="showAlbumTracks('/api/get/album/playlist/${data[i].playlistId}', 'showAlbumTracks-${i}', 'Various Artists', '${data[i].name}', '${data[i].year}', '${data[i].thumbnails[3].url}')"> Show Tracks </a>
+                            <a id="showAlbumTracks-${i}" href="#"> Show Tracks </a>
                         </div>
                     </div>
                 `)
+                document.getElementById(`showAlbumTracks-${i}`).onclick = () => { // Add onclick method to element
+                    showAlbumTracks(`/api/get/album/playlist/${data[i].playlistId}`, `showAlbumTracks-${i}`, 'Various Artists', data[i].name, data[i].year, data[i].thumbnails[3].url)
+                }
             } else {
                 Content.append(`
                     <div class="itemContainer" style="display:flex; margin: 16px;">
-                        <img style="height:60px; width: 60px;" src="${data[i].thumbnails[0].url}" alt="${data[i].name} album cover...">
+                        <img referrerpolicy="no-referrer" style="height:60px; width: 60px;" src="${data[i].thumbnails[0].url}" alt="${data[i].name} [Cover]">
                         <div style="flex-direction:column;">
                             <p style="padding-bottom: 10px;"> ${data[i].artists[0].name} - ${data[i].name} (${data[i].year}) </p>
-                            <a id="showAlbumTracks-${i}" href="#" onclick="showAlbumTracks('/api/get/album/playlist/${data[i].playlistId}', 'showAlbumTracks-${i}', '${data[i].artists[0].name}', '${data[i].name}', '${data[i].year}', '${data[i].thumbnails[3].url}')"> Show Tracks </a>
+                            <a id="showAlbumTracks-${i}" href="#"> Show Tracks </a>
                         </div>
                     </div>
                 `)
+                document.getElementById(`showAlbumTracks-${i}`).onclick = () => { // Add onclick method to element
+                    showAlbumTracks(`/api/get/album/playlist/${data[i].playlistId}`, `showAlbumTracks-${i}`, data[i].artists[0].name, data[i].name, data[i].year, data[i].thumbnails[3].url)
+                } 
             }
         }
     } else if (handler == 'Song') {
@@ -201,7 +235,7 @@ let showInformation = async(data, handler) => {
             if (data[i].artists.length == 0) { // If there are no artists in the album
                 Content.append(` 
                     <div class="itemContainer" style="display:flex; margin: 16px;">
-                        <img src="${data[i].thumbnails[0].url}" alt="album cover...">
+                        <img referrerpolicy="no-referrer" style="height:60px; width: 60px;" src="${data[i].thumbnails[0].url}" alt="Album [Cover]">
                         <div style="flex-direction:column;">
                             <p style="padding-bottom: 10px;"> Various Artists - ${data[i].name} </p>
                             <a id="progress-bar-${i}" href="#" onclick="downloadSong('/api/download/song/${data[i].videoId}?artist=Various Artists&title=${data[i].name}&album=${data[i].album.name}&cover=${cover}', 'progress-bar-${i}')"> Download </a>
@@ -212,7 +246,7 @@ let showInformation = async(data, handler) => {
             } else {
                 Content.append(`
                     <div class="itemContainer" style="display:flex; margin: 16px;">
-                        <img src="${data[i].thumbnails[0].url}" alt="album cover...">
+                        <img referrerpolicy="no-referrer" style="height:60px; width:60px;" src="${data[i].thumbnails[0].url}" alt="Album [Cover]">
                         <div style="flex-direction:column;">
                             <p style="padding-bottom: 10px;"> ${data[i].artists[0].name} - ${data[i].name} </p> 
                             <a id="progress-bar-${i}" href="#" onclick="downloadSong('/api/download/song/${data[i].videoId}?artist=${data[i].artists[0].name}&title=${data[i].name}&album=${data[i].album.name}&cover=${cover}', 'progress-bar-${i}')"> Download </a>
@@ -225,8 +259,6 @@ let showInformation = async(data, handler) => {
     }
 }
 
-// <a href="/api/download/song/${data[i].videoId}?artist=${data[i].artists[0].name}&title=${data[i].name}&album=${data[i].album.name}&cover=${cover}"> Download </a>
-
 Methods.change(() => { // Empty everything
     Content.empty()
     SearchBox.val('')
@@ -237,11 +269,11 @@ SearchBox.keyup( (event) => {
     if (event.keyCode == 13) {
         Content.empty() // First we clear the content
         if (Methods.val() == 'Album') {
-            fetch(`/api/search/album/${SearchBox.val()}`)
+            fetch(`/api/album/search?q=${SearchBox.val()}`)
                 .then(response => response.json())
                 .then(data => showInformation(data, 'Album'))
         } else if (Methods.val() == 'Song') {
-            fetch(`/api/search/song/${SearchBox.val()}`)
+            fetch(`/api/song/search?q=${SearchBox.val()}`)
                 .then(response => response.json())
                 .then(data => showInformation(data, 'Song'))
         }

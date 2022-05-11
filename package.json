@@ -7,16 +7,15 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-      "adm-zip": "^0.5.9",
-      "express": "^4.18.1",
-      "fluent-ffmpeg": "^2.1.2",
-      "himalaya": "^1.1.0",
-      "node-id3": "^0.2.3",
-      "ytdl-core": "^4.11.0",
-      "ytmusic-api": "^1.1.3"
+    "express": "^4.18.1",
+    "fluent-ffmpeg": "^2.1.2",
+    "himalaya": "^1.1.0",
+    "node-id3": "^0.2.3",
+    "ytdl-core": "^4.11.0",
+    "ytmusic-api": "^1.1.3"
   },
   "engines": {
-      "node": "17.9.0"
+    "node": "17.9.0"
   },
   "author": "Thanatoslayer6",
   "license": "ISC"

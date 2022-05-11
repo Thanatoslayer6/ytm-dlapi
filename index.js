@@ -11,7 +11,7 @@ app.get('/', (req, res) => {
 })
 
 // Routes
-app.use('/api/search', search);
+app.use('/api/', search);
 app.use('/api/get', get);
 app.use('/api/stream', stream);
 app.use('/api/download', download);
