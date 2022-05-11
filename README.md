@@ -11,21 +11,44 @@
 
 ## API Features
 
-`/api/search/song/{Song name}`
+#### Searching and Getting an Album/Song's Information
 
-- Search for a song, receive json data
+##### /api/song/search?q={Song name}
 
-`/api/search/album/{Album name}`
+- Filters the search for only songs, receive JSON data just like a search request on YouTube-Music.
+- Method: **GET**
 
-- Search for an album, receive json data
+##### /api/album/search?q={Album name}
 
-`/api/stream/song/${videoId}`
+- Search for an album, results are of the same search request on YouTube-Music, but filtered to only show albums/singles.
+- Method: **GET**
+
+##### /api/get/song/${videoId}
+
+- Fetches the song's information, gives thumbnails, duration, year, etc.
+- Method: **GET**
+
+##### /api/get/album/${albumId}
+
+- Returns the album's description, tracks (videoId, name), year, playlistId, thumbnails, etc.
+- Method: **GET**
+- Note: _Fetched tracks within this endpoint is not as accurate as getting the Official Audio for a song/track. For better results, use the endpoint `/api/get/album/playist/${playlistId}` for getting the proper tracks and their videoId's._
+
+##### /api/get/album/playlist/${playlistId}
+
+- Gets the album's tracks with their respective videoId's and some other information like year, thumbnails, track number, etc. Scrapes the unlisted playlist of the said album set by YouTube.
+- Method: **GET**
+
+#### Streaming
+
+##### /api/stream/song/${videoId}
 
 - Streams a song when given a YouTube videoId
+- Method: **GET**
 
 #### Downloading
 
-`/api/download/song/${videoId}`
+##### /api/download/song/${videoId}
 
 - Downloads a song when given a videoId
 
@@ -38,7 +61,7 @@
   /api/download/song/lXcX5llJeko?artist=The Fray&title=How To Save A Life&album=How To Save A Life&cover=https://lh3.googleusercontent.com/sB9QbA0jMTQ_4xKJdqt7tUEm_GPazioRHhZ4WWRuTKt7k9yVIKiYbAlpjYKGymR5Ru14e6W0Ta9WbT34=w544-h544-l90-rj
   ```
 
-`/api/download/album/${playlistId}`
+##### /api/download/album/${playlistId}
 
 - Downloads the album of an artist
 
@@ -51,7 +74,7 @@
   /api/download/album/OLAK5uy_m-gO_Tg8nscLdoNdXORCpV4gHstHJ9J04?artist=Mac DeMarco&album=Salad Days&year=2014&cover=https://lh3.googleusercontent.com/kD050a9mq1WH-QF6KkZPxqG-FEOdp_W425-zUgrHsyTP8kLg4QRmzgnzcHve6fCY-Vz7_xdGXmxdvICQ=w544-h544-l90-rj
   ```
   
-## Installation
+## Local Installation
 
 _Requirements_
 - [ffmpeg](https://ffmpeg.org/download.html)

@@ -170,8 +170,8 @@ let showAlbumTracks = async (playlistLink, id, artist, album, year, cover) => {
     toggleAlbumTracks(id)
     $(`#${id}`).after(`
         <div id="${id}-methods" style="margin-bottom: 8px;"> 
-            <a onclick="toggleAlbumTracks('${id}')" style="font-size: 14px;" href="#"> Close </a> 
-            <a id="${id}-download" style="font-size: 14px;" href="#"> Download Album </a>
+            <a onclick="toggleAlbumTracks('${id}')" style="font-size: 14px;" href="javascript:void(0)"> Close </a> 
+            <a id="${id}-download" style="font-size: 14px;" href="javascript:void(0)"> Download Album </a>
         </div>
         <div id="${id}-tracks"> 
         </div>
@@ -190,14 +190,14 @@ let showAlbumTracks = async (playlistLink, id, artist, album, year, cover) => {
             <p style="display:flex; font-size: 12px; width: 600px;"> 
                 <b style="margin-right: 20px;">Track: #${i + 1}</b> 
                 <span style="width: 200px;"> ${title} </span>
-                <a itemid="${link}" data-title="${title}" id="progress-${id}-${i}" href="#" onclick="downloadSong('${link}', 'progress-${id}-${i}')"> 
+                <a itemid="${link}" data-title="${title}" id="progress-${id}-${i}" href="javascript:void(0)" onclick="downloadSong('${link}', 'progress-${id}-${i}')"> 
                     Download Track
                 </a>
             </p>
         `)
     }
 }
-                            // <a id="showAlbumTracks-${i}" href="#" onclick="showAlbumTracks('/api/get/album/playlist/${data[i].playlistId}', 'showAlbumTracks-${i}', ${data[i].artists[0].name}, ${data[i].name}, ${data[i].year}, '${data[i].thumbnails[3].url}')"> Show Tracks </a>
+                            // <a id="showAlbumTracks-${i}" href="javascript" onclick="showAlbumTracks('/api/get/album/playlist/${data[i].playlistId}', 'showAlbumTracks-${i}', ${data[i].artists[0].name}, ${data[i].name}, ${data[i].year}, '${data[i].thumbnails[3].url}')"> Show Tracks </a>
 let showInformation = async (data, handler) => {
     if (handler == 'Album') {
         for (let i = 0; i < data.length; i++) { // Start progress bar
@@ -207,7 +207,7 @@ let showInformation = async (data, handler) => {
                         <img referrerpolicy="no-referrer" style="height:60px; width:60px;" src="${data[i].thumbnails[0].url}" alt="${data[i].name} [Cover]">
                         <div style="flex-direction:column;">
                             <p style="padding-bottom: 10px;"> Various Artists - ${data[i].name} (${data[i].year}) </p>
-                            <a id="showAlbumTracks-${i}" href="#"> Show Tracks </a>
+                            <a id="showAlbumTracks-${i}" href="javascript:void(0)"> Show Tracks </a>
                         </div>
                     </div>
                 `)
@@ -220,7 +220,7 @@ let showInformation = async (data, handler) => {
                         <img referrerpolicy="no-referrer" style="height:60px; width: 60px;" src="${data[i].thumbnails[0].url}" alt="${data[i].name} [Cover]">
                         <div style="flex-direction:column;">
                             <p style="padding-bottom: 10px;"> ${data[i].artists[0].name} - ${data[i].name} (${data[i].year}) </p>
-                            <a id="showAlbumTracks-${i}" href="#"> Show Tracks </a>
+                            <a id="showAlbumTracks-${i}" href="javascript:void(0)"> Show Tracks </a>
                         </div>
                     </div>
                 `)
@@ -238,8 +238,8 @@ let showInformation = async (data, handler) => {
                         <img referrerpolicy="no-referrer" style="height:60px; width: 60px;" src="${data[i].thumbnails[0].url}" alt="Album [Cover]">
                         <div style="flex-direction:column;">
                             <p style="padding-bottom: 10px;"> Various Artists - ${data[i].name} </p>
-                            <a id="progress-bar-${i}" href="#" onclick="downloadSong('/api/download/song/${data[i].videoId}?artist=Various Artists&title=${data[i].name}&album=${data[i].album.name}&cover=${cover}', 'progress-bar-${i}')"> Download </a>
-                            <a id="streamButton-${i}" href="#" onclick="streamAudio('api/stream/song/${data[i].videoId}', '#streamButton-${i}')">Play Now</a>
+                            <a id="progress-bar-${i}" href="javascript:void(0)" onclick="downloadSong('/api/download/song/${data[i].videoId}?artist=Various Artists&title=${data[i].name}&album=${data[i].album.name}&cover=${cover}', 'progress-bar-${i}')"> Download </a>
+                            <a id="streamButton-${i}" href="javascript:void(0)" onclick="streamAudio('api/stream/song/${data[i].videoId}', '#streamButton-${i}')">Play Now</a>
                         </div>
                     </div>
                 `)
@@ -249,8 +249,8 @@ let showInformation = async (data, handler) => {
                         <img referrerpolicy="no-referrer" style="height:60px; width:60px;" src="${data[i].thumbnails[0].url}" alt="Album [Cover]">
                         <div style="flex-direction:column;">
                             <p style="padding-bottom: 10px;"> ${data[i].artists[0].name} - ${data[i].name} </p> 
-                            <a id="progress-bar-${i}" href="#" onclick="downloadSong('/api/download/song/${data[i].videoId}?artist=${data[i].artists[0].name}&title=${data[i].name}&album=${data[i].album.name}&cover=${cover}', 'progress-bar-${i}')"> Download </a>
-                            <a id="streamButton-${i}" href="#" onclick="streamAudio('api/stream/song/${data[i].videoId}', '#streamButton-${i}')">Play Now</a>
+                            <a id="progress-bar-${i}" href="javascript:void(0)" onclick="downloadSong('/api/download/song/${data[i].videoId}?artist=${data[i].artists[0].name}&title=${data[i].name}&album=${data[i].album.name}&cover=${cover}', 'progress-bar-${i}')"> Download </a>
+                            <a id="streamButton-${i}" href="javascript:void(0)" onclick="streamAudio('api/stream/song/${data[i].videoId}', '#streamButton-${i}')">Play Now</a>
                         </div>
                     </div>
                 `)
