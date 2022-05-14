@@ -2,7 +2,6 @@ const YTMusic = require("ytmusic-api").default
 const ytmusic = new YTMusic();
 const express = require('express');
 const router = express.Router();
-const { parse } = require('himalaya')
 const axios = require('axios');
 
 router.get('/album/:albumId', (req, res) => {
@@ -22,12 +21,9 @@ router.get('/album/playlist/:playlistId', (req, res) => {
     axios.get(properUrl)
         .then(resp => {
             // Scrape json inside script tag
-            let yt = parse(resp.data)[1].children[1].children[16].children[0].content // 16th element inside body
-            let ytdata = JSON.parse(yt.slice(20, yt.length - 1)) // Parse json
-            let info = ytdata.contents.twoColumnBrowseResultsRenderer.tabs[0]
-                .tabRenderer.content.sectionListRenderer.contents[0]
-                .itemSectionRenderer.contents[0]
-                .playlistVideoListRenderer.contents
+            let ytInitialData = JSON.parse(/(?:window\["ytInitialData"\])|(?:ytInitialData) =.*?({.*?});/s.exec(resp.data)?.[1] || '{}');
+            let listData = ytInitialData.contents.twoColumnBrowseResultsRenderer.tabs[0].tabRenderer.content.sectionListRenderer.contents[0].itemSectionRenderer.contents[0].playlistVideoListRenderer;
+            let info = listData.contents
             res.status(200).send(info);
         }).catch(err => {
             res.status(404).send(`Invalid playlistId! = '${req.params.playlistId}' Not Found!`)
