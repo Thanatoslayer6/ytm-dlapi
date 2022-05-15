@@ -185,7 +185,7 @@ let showAlbumTracks = async (playlistLink, id, artist, album, year, cover) => {
     for (let i = 0; i < data.length; i++) {
         let title = data[i].playlistVideoRenderer.title.runs[0].text;
         let videoId = data[i].playlistVideoRenderer.videoId;
-        let link = `/api/download/song/${videoId}?artist=${artist}&album=${album}&title=${title}&cover=${cover}&year=${year}&track=${i + 1}`
+        let link = `/api/download/song/${videoId}?artist=${encodeURIComponent(artist)}&album=${encodeURIComponent(album)}&title=${encodeURIComponent(title)}&cover=${cover}&year=${year}&track=${i + 1}`
         $(`#${id}-tracks`).append(`
             <p style="display:flex; font-size: 12px; width: 600px;"> 
                 <b style="margin-right: 20px;">Track: #${i + 1}</b> 
@@ -197,7 +197,7 @@ let showAlbumTracks = async (playlistLink, id, artist, album, year, cover) => {
         `)
     }
 }
-                            // <a id="showAlbumTracks-${i}" href="javascript" onclick="showAlbumTracks('/api/get/album/playlist/${data[i].playlistId}', 'showAlbumTracks-${i}', ${data[i].artists[0].name}, ${data[i].name}, ${data[i].year}, '${data[i].thumbnails[3].url}')"> Show Tracks </a>
+
 let showInformation = async (data, handler) => {
     if (handler == 'Album') {
         for (let i = 0; i < data.length; i++) { // Start progress bar
@@ -238,7 +238,7 @@ let showInformation = async (data, handler) => {
                         <img referrerpolicy="no-referrer" style="height:60px; width: 60px;" src="${data[i].thumbnails[0].url}" alt="Album [Cover]">
                         <div style="flex-direction:column;">
                             <p style="padding-bottom: 10px;"> Various Artists - ${data[i].name} </p>
-                            <a id="progress-bar-${i}" href="javascript:void(0)" onclick="downloadSong('/api/download/song/${data[i].videoId}?artist=Various Artists&title=${data[i].name}&album=${data[i].album.name}&cover=${cover}', 'progress-bar-${i}')"> Download </a>
+                            <a id="progress-bar-${i}" href="javascript:void(0)" onclick="downloadSong('/api/download/song/${data[i].videoId}?artist=Various Artists&title=${encodeURIComponent(data[i].name)}&album=${encodeURIComponent(data[i].album.name)}&cover=${cover}', 'progress-bar-${i}')"> Download </a>
                             <a id="streamButton-${i}" href="javascript:void(0)" onclick="streamAudio('api/stream/song/${data[i].videoId}', '#streamButton-${i}')">Play Now</a>
                         </div>
                     </div>
@@ -249,7 +249,7 @@ let showInformation = async (data, handler) => {
                         <img referrerpolicy="no-referrer" style="height:60px; width:60px;" src="${data[i].thumbnails[0].url}" alt="Album [Cover]">
                         <div style="flex-direction:column;">
                             <p style="padding-bottom: 10px;"> ${data[i].artists[0].name} - ${data[i].name} </p> 
-                            <a id="progress-bar-${i}" href="javascript:void(0)" onclick="downloadSong('/api/download/song/${data[i].videoId}?artist=${data[i].artists[0].name}&title=${data[i].name}&album=${data[i].album.name}&cover=${cover}', 'progress-bar-${i}')"> Download </a>
+                            <a id="progress-bar-${i}" href="javascript:void(0)" onclick="downloadSong('/api/download/song/${data[i].videoId}?artist=${encodeURIComponent(data[i].artists[0].name)}&title=${encodeURIComponent(data[i].name)}&album=${encodeURIComponent(data[i].album.name)}&cover=${cover}', 'progress-bar-${i}')"> Download </a>
                             <a id="streamButton-${i}" href="javascript:void(0)" onclick="streamAudio('api/stream/song/${data[i].videoId}', '#streamButton-${i}')">Play Now</a>
                         </div>
                     </div>
@@ -269,11 +269,11 @@ SearchBox.keyup( (event) => {
     if (event.keyCode == 13) {
         Content.empty() // First we clear the content
         if (Methods.val() == 'Album') {
-            fetch(`/api/album/search?q=${SearchBox.val()}`)
+            fetch(`/api/album/search?q=${encodeURIComponent(SearchBox.val())}`) // Fix for inputting ampersand and some special characters
                 .then(response => response.json())
                 .then(data => showInformation(data, 'Album'))
         } else if (Methods.val() == 'Song') {
-            fetch(`/api/song/search?q=${SearchBox.val()}`)
+            fetch(`/api/song/search?q=${encodeURIComponent(SearchBox.val())}`)
                 .then(response => response.json())
                 .then(data => showInformation(data, 'Song'))
         }
