@@ -3,6 +3,7 @@ const contentDisposition = require('content-disposition')
 const axios = require('axios').default;
 const NodeID3 = require('node-id3')
 const ffmpeg = require('fluent-ffmpeg');
+const ffmpeg_path = require('ffmpeg-static');
 const express = require('express');
 const router = express.Router();
 
@@ -30,6 +31,7 @@ router.get('/song/:videoId', async (req, res) => { // Year, Artist/, Title/, Alb
 
     let song = [] // Array to store untagged song buffer to...
     ffmpeg(stream)
+        .setFfmpegPath(ffmpeg_path)
         .toFormat('mp3')
         .pipe()
         .on('data', chunk => {

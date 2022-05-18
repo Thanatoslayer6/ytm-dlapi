@@ -5,9 +5,7 @@
     "keywords": ["YoutubeMusic", "express", "ffmpeg", "youtubemusic-api", "ytmusic", "nodejs"],
     "buildpacks": [
         {
-        "url": "https://github.com/jonathanong/heroku-buildpack-ffmpeg-latest.git"
-        },{
-        "url": "heroku/nodejs"
+            "url": "heroku/nodejs"
         }
     ]
 }
