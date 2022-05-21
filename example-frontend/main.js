@@ -75,10 +75,14 @@ let downloadSong = (link, id) => {
     }); 
 }
 
-let downloadAlbum = async (id, numOfTracks, artist, album, year) => {
-    let storage = [], error = {}, x = 0, progressText = "Downloading Tracks";
+let downloadAlbum = async (id, numOfTracks, artist, album, year, format) => {
+    let storage = [], error = {}, zipped = null, x = 0, progressText = "Downloading Tracks";
     let zip = new JSZip()
-    let zipped = zip.folder(`${artist} - ${album} (${year})`) // Create folder to store tracks
+    if (format == "Default") {
+        zipped = zip.folder(`${artist} - ${album} (${year})`) // Create folder to store tracks
+    } else if (format == "Jellyfin") {
+        zipped = zip.folder(`${artist}/${album} (${year})`) // Create folder structure for jellyfin
+    }
 
     $(`#${id}-tracks p a`).each((index, el) => { // Store every track's download link in array
         storage.push({
@@ -122,8 +126,11 @@ let downloadAlbum = async (id, numOfTracks, artist, album, year) => {
             }
             $(`#progress-${id}-${i}`).val(75) // Put 75%
             $(`#progress-${id}-${i}-label`).text("Archiving file: ")
-            zipped.file(`${artist} - ${storage[i].track}.mp3`, storage[i].blob) // Archive file
-            // 
+            if (format == "Default") { // Default Format
+                zipped.file(`${artist} - ${storage[i].track}.mp3`, storage[i].blob) // Archive file
+            } else if (format == "Jellyfin") { // Jellyfin format https://jellyfin.org/docs/general/server/media/music.html
+                zipped.file(`${('0'+(i+1)).slice(-2)} - ${storage[i].track}.mp3`, storage[i].blob) // Archive file
+            }
             $(`#progress-${id}-${i}`).val(100) // Put 100%
             $(`#progress-${id}-${i}-label`).text("Finished: ")
     }
@@ -167,20 +174,30 @@ let showAlbumTracks = async (playlistLink, id, artist, album, year, cover) => {
         data = await resp.json()
     }
 
+    // Show album tracks
     toggleAlbumTracks(id)
+
     $(`#${id}`).after(`
         <div id="${id}-methods" style="margin-bottom: 8px;"> 
             <a onclick="toggleAlbumTracks('${id}')" style="font-size: 14px;" href="javascript:void(0)"> Close </a> 
             <a id="${id}-download" style="font-size: 14px;" href="javascript:void(0)"> Download Album </a>
         </div>
+        <div style="margin: 12px 0 12px 16px;">
+            <label for="${id}-download-format"> Format: </label>
+            <select id="${id}-download-format">
+                <option value="Default"> Default </option>
+                <option value="Jellyfin"> Jellyfin </option>
+            </select>
+        </div>
         <div id="${id}-tracks"> 
         </div>
     `)
-    // Attach onclick to the "Download Album" method
+    // Attach onclick to the "Download Album" method, hide other method
     document.getElementById(`${id}-download`).onclick = () => {
-        downloadAlbum(id, data.length, artist, album, year)
+        let format = document.getElementById(`${id}-download-format`).value;
+        console.log(`User has chosen to download album with ${format} as format`)
+        downloadAlbum(id, data.length, artist, album, year, format);
     }
-    // onclick="downloadAlbum('${id}', ${data.length}, '${artist}', '${album}', ${year})" 
 
     for (let i = 0; i < data.length; i++) {
         let title = data[i].playlistVideoRenderer.title.runs[0].text;
