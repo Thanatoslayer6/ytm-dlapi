@@ -2,12 +2,6 @@
 
 🎵 A Youtube Music Downloader/API Running on Express 🖥️
 
-👇 **Deploy to Heroku in one click!** 👍
-
-[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/Thanatoslayer6/ytm-dlapi/)
-
-_Warning: Deploy at your own risk! (Your account might get banned/suspended for violating the TOS)_
-
 ### A Quick Front-End that I created 😑
 ![Example Frontend](/example-frontend/example-frontend.png)
 

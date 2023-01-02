@@ -1,22 +1,21 @@
 {
   "name": "ytm-dlapi",
-  "version": "0.0.1",
-  "description": "A Youtube Music Downloader/API Running on Express",
+  "version": "1.0.0",
+  "description": "A Youtube-Music API/Downloader running on Express",
   "main": "index.js",
+  "repository": "https://github.com/Thanatoslayer6/ytm-dlapi.git",
+  "author": "Thanatoslayer6 <Thanatoslayer6@gmail.com>",
+  "license": "ISC",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+      "start": "node index.js",
+      "upgradeDependencies": "yarn --latest upgrade-interactive"
   },
   "dependencies": {
-    "express": "^4.18.1",
-    "ffmpeg-static": "^5.0.0",
+    "express": "^4.18.2",
+    "ffmpeg-static": "^5.1.0",
     "fluent-ffmpeg": "^2.1.2",
-    "node-id3": "^0.2.3",
-    "ytdl-core": "^4.11.0",
-    "ytmusic-api": "^1.1.3"
-  },
-  "engines": {
-    "node": "17.x"
-  },
-  "author": "Thanatoslayer6",
-  "license": "ISC"
+    "node-id3": "^0.2.5",
+    "ytdl-core": "^4.11.2",
+    "ytmusic-api": "^4.1.0"
+  }
 }
